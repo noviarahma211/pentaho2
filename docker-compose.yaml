@@ -1,0 +1,31 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: airflow_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 
+      MYSQL_ROOT_PASSWORD: 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  airflow:
+    image: apache/airflow:2.2.0
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: mysql://airflow:airflow_password@mysql/airflow_db
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor  # or CeleryExecutor if using Celery
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+
+volumes:
+  mysql_data:
